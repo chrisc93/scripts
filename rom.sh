@@ -25,7 +25,7 @@
 #         #
 ###########
 
-# $ rom.sh <me|rom> <device> (person)
+# $ rom.sh <rom> <device> (person)
 
 
 ############
@@ -74,13 +74,9 @@ SUCCESS=false
 
 while [[ $# -ge 1 ]]; do
    case "${1}" in
-      "me")
-         ROM=flash
-         DEVICE=angler ;;
-      "shamu"|"angler"|"bullhead"|"hammerhead")
-         DEVICE=${1} ;;
-      "pn"|"pn-dui"|"du"|"abc"|"maple"|"aosip"|"saosp")
-         ROM=${1} ;;
+      "flash"|"pn"|"uber")
+         ROM=${1}
+         DEVICE=bullhead ;;
       *)
          echo "Invalid parameter detected!" && exit ;;
    esac
@@ -90,7 +86,7 @@ done
 
 # PARAMETER VERIFICATION
 if [[ -z ${DEVICE} || -z ${ROM} ]]; then
-   echo "You did not specify a necessary parameter (either ROM, device, or both). Please re-run the script with the necessary parameters!" && exit
+   echo "You did not specify a ROM. Please re-run the script with the necessary parameters!" && exit
 fi
 
 ###############
@@ -104,43 +100,23 @@ fi
 # SOURCE_DIR: Directory that holds the ROM source
 # ZIP_MOVE: Directory to hold completed ROM zips
 # ZIP_FORMAT: The format of the zip file in the out directory for moving to ZIP_MOVE
-ANDROID_DIR=${HOME}
-ZIP_MOVE_PARENT=${HOME}/Web/.superhidden/ROMs
+ANDROID_DIR=/android
+ZIP_MOVE_PARENT=/media/data/Media/www/builds.csconley.com/public_html
 
 # Otherwise, define them for our various ROMs
 case "${ROM}" in
-   "abc")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/ABC
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/ABC/${DEVICE}
-      ZIP_FORMAT=ABCrom_nexus_${DEVICE}-*.zip ;;
-   "aosip")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/AOSiP
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/AOSiP/${DEVICE}
-      ZIP_FORMAT=AOSiP-*-${DEVICE}-*.zip ;;
-   "du")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/DirtyUnicorns/${DEVICE}
-      ZIP_FORMAT=DU_${DEVICE}_*.zip ;;
    "flash")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/Flash
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/Personal
+      SOURCE_DIR=${ANDROID_DIR}/flash
+      ZIP_MOVE=${ZIP_MOVE_PARENT}/flash
       ZIP_FORMAT=flash_${DEVICE}-7*.zip ;;
-   "maple")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/MapleAOSP
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/MapleAOSP/${DEVICE}
-      ZIP_FORMAT=MapleAOSP*.zip ;;
    "pn")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE}
+      SOURCE_DIR=${ANDROID_DIR}/pure_nexus
+      ZIP_MOVE=${ZIP_MOVE_PARENT}/pure_nexus
       ZIP_FORMAT=pure_nexus_${DEVICE}-7*.zip ;;
-   "pn-dui")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/PN-DUI
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/PN-DUI
-      ZIP_FORMAT=pure_nexus_${DEVICE}-7*.zip ;;
-   "saosp")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/SAOSP
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/SAOSP/${DEVICE}
-      ZIP_FORMAT=saosp_${DEVICE}*.zip ;;
+   "uber")
+      SOURCE_DIR=${ANDROID_DIR}/uber
+      ZIP_MOVE=${ZIP_MOVE_PARENT}/uber
+      ZIP_FORMAT=uber_${DEVICE}-7*.zip ;;
 esac
 
 OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
@@ -264,10 +240,6 @@ if [[ $( ls ${OUT_DIR}/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
       newLine; echoText "MAKING ZIP_MOVE DIRECTORY"
 
       mkdir -p "${ZIP_MOVE}"
-   else
-      newLine; echoText "CLEANING ZIP_MOVE DIRECTORY"; newLine
-
-      rm -vrf "${ZIP_MOVE}"/*${ZIP_FORMAT}*
    fi
 
 
@@ -277,7 +249,9 @@ if [[ $( ls ${OUT_DIR}/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
 
    newLine; echoText "MOVING FILES TO ZIP_MOVE DIRECTORY"; newLine
 
-   mv -v ${OUT_DIR}/*${ZIP_FORMAT}* "${ZIP_MOVE}"
+   mv -v ${OUT_DIR}/*${ZIP_FORMAT} "${ZIP_MOVE}"
+
+   LATEST_ZIP=$(ls ${ZIP_MOVE} -tp | grep -v /$ | head -1)
 
 
 ###################
@@ -313,15 +287,13 @@ newLine; echoText "${BUILD_RESULT_STRING}!"
 
 # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION, AND SIZE
 if [[ ${SUCCESS} = true ]]; then
-   echo -e ${RED}"FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )"
-   echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_FORMAT} | awk '{print $1}'  )"${RESTORE}
+   echo -e ${RED}"FILE LOCATION: $( ls ${ZIP_MOVE}/${LATEST_ZIP} )"
 fi
 
 # PRINT THE TIME THE SCRIPT FINISHED
 # AND HOW LONG IT TOOK REGARDLESS OF SUCCESS
 echo -e ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
 echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"${RESTORE}; newLine
-
 
 
 ##################
@@ -342,7 +314,7 @@ echo -e "${BUILD_RESULT_STRING} IN $( echo $((${END}-${START})) | awk '{print in
 # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
 if [[ ${SUCCESS} = true ]]; then
    # FILE LOCATION: <PATH>
-   echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )" >> ${LOG}
+   echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/${LATEST_ZIP} )" >> ${LOG}
 fi
 
 
