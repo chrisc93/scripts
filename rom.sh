@@ -68,7 +68,6 @@ function newLine() {
 ################
 
 # UNASSIGN FLAGS AND RESET ROM_BUILD_TYPE
-unset ROM_BUILD_TYPE
 PERSONAL=false
 SUCCESS=false
 
@@ -110,6 +109,7 @@ case "${ROM}" in
       ZIP_MOVE=${ZIP_MOVE_PARENT}/flash
       ZIP_FORMAT=flash_${DEVICE}-7*.zip ;;
    "pn")
+      ROM_BUILD_TYPE=CUSTOM
       SOURCE_DIR=${ANDROID_DIR}/pure_nexus
       ZIP_MOVE=${ZIP_MOVE_PARENT}/pure_nexus
       ZIP_FORMAT=pure_nexus_${DEVICE}-7*.zip ;;
@@ -135,9 +135,9 @@ clear
 # START TRACKING TIME #
 #######################
 
-echoText "SCRIPT STARTING AT $( TZ=MST date +%D\ %r )"
+echoText "SCRIPT STARTING AT $( TZ=EST date +%D\ %r )"
 
-START=$( TZ=MST date +%s )
+START=$( TZ=EST date +%s )
 
 
 ###########################
@@ -207,7 +207,7 @@ make clobber
 
 echoText "MAKING ZIP FILE"; newLine
 
-NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
+NOW=$( TZ=EST date +"%Y-%m-%d-%S" )
 
 # NOT ALL ROMS USE MKA OR BACON
 case "${ROM}" in
@@ -277,7 +277,7 @@ fi
 # SCRIPT END #
 ##############
 
-END=$( TZ=MST date +%s )
+END=$( TZ=EST date +%s )
 newLine; echoText "${BUILD_RESULT_STRING}!"
 
 
@@ -292,7 +292,7 @@ fi
 
 # PRINT THE TIME THE SCRIPT FINISHED
 # AND HOW LONG IT TOOK REGARDLESS OF SUCCESS
-echo -e ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
+echo -e ${RED}"TIME FINISHED: $( TZ=EST date +%D\ %r | awk '{print toupper($0)}' )"
 echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"${RESTORE}; newLine
 
 
@@ -303,9 +303,9 @@ echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" 
 # DATE: BASH_SOURCE (PARAMETERS)
 case ${PERSONAL} in
    "true")
-      echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} me" >> ${LOG} ;;
+      echo -e "\n$( TZ=EST date +%H:%M:%S ): ${BASH_SOURCE} me" >> ${LOG} ;;
    *)
-      echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${LOG} ;;
+      echo -e "\n$( TZ=EST date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${LOG} ;;
 esac
 
 # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
